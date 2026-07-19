@@ -48,6 +48,15 @@ $bytes = $client->pipeline('https://example.com/image.jpg', [
 file_put_contents('out.webp', $bytes);
 ```
 
+Sources can be an image URL, a base64 string, or a `data:` URI. For local files or in-memory bytes:
+
+```php
+use Pictomancer\Source;
+
+$bytes = $client->compress(Source::fromPath('photo.jpg'), ['q' => 80]);
+$bytes = $client->compress(Source::fromBytes($raw), ['q' => 80]);
+```
+
 ## Delivery: write the result somewhere else
 
 By default an operation returns the optimized bytes. Pass a delivery target to
