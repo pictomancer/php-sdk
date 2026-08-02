@@ -157,4 +157,28 @@ final class ClientTest extends TestCase
         $this->assertStringContainsString('"format":"webp"', $body);
         $this->assertStringContainsString('"q":90', $body);
     }
+
+    public function testCompressPutsQualityTargetInBody(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->compress(self::SOURCE, ['format' => 'webp', 'quality_target' => 0.95]);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"quality_target":0.95', $body);
+        $this->assertStringContainsString('"format":"webp"', $body);
+    }
+
+    public function testConvertPutsQualityTargetInBody(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->convert(self::SOURCE, 'avif', ['quality_target' => 0.9]);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"quality_target":0.9', $body);
+        $this->assertStringContainsString('"format":"avif"', $body);
+    }
 }

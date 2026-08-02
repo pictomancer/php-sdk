@@ -57,6 +57,36 @@ $bytes = $client->compress(Source::fromPath('photo.jpg'), ['q' => 80]);
 $bytes = $client->compress(Source::fromBytes($raw), ['q' => 80]);
 ```
 
+## Quality target: smallest file above an SSIM floor
+
+Instead of guessing a `q` number, pass `quality_target` (float, 0 < v <= 1) to
+`compress` or `convert` and the server binary-searches the encoder quality for
+the smallest file whose SSIM against the source is at least the target:
+
+```php
+$bytes = $client->compress('https://example.com/image.jpg', [
+    'format' => 'webp',
+    'quality_target' => 0.95,
+]);
+$bytes = $client->convert('https://example.com/image.jpg', 'avif', [
+    'quality_target' => 0.9,
+]);
+```
+
+Constraints (the server rejects violations with a 422):
+
+- Mutually exclusive with `q`; on `convert` also invalid with `lossless`.
+- Output format must be `jpeg`, `webp` or `avif`; `compress` requires an
+  explicit `format`.
+- Not supported inside `pipeline` operations.
+
+The outcome is reported in response headers: `X-Pictomancer-Quality-Target`,
+`X-Pictomancer-Quality-Achieved` (e.g. `0.9530`), `X-Pictomancer-Quality-Q-Final`
+and `X-Pictomancer-Quality-Encodes`. They are absent when no search ran. The SDK
+returns only the body (bytes or JSON), so read the headers with your own HTTP
+tooling if you need the report. `X-Pig-Billed: 0` means the input came back
+untouched and the request was free.
+
 ## Delivery: write the result somewhere else
 
 By default an operation returns the optimized bytes. Pass a delivery target to

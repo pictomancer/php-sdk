@@ -6,7 +6,7 @@ namespace Pictomancer;
 
 final class Client
 {
-    public const VERSION = '0.1.0';
+    public const VERSION = '0.2.0';
 
     public const DEFAULT_BASE_URL = 'https://api.pictomancer.ai';
 
@@ -56,7 +56,7 @@ final class Client
     }
 
     /**
-     * @param array<string, mixed> $options format, q, strip, ...
+     * @param array<string, mixed> $options format, q, quality_target, strip, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed>
      */
@@ -66,7 +66,7 @@ final class Client
     }
 
     /**
-     * @param array<string, mixed> $options q, strip, lossless, ...
+     * @param array<string, mixed> $options q, quality_target, strip, lossless, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed>
      */
