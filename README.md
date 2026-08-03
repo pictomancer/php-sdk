@@ -57,6 +57,36 @@ $bytes = $client->compress(Source::fromPath('photo.jpg'), ['q' => 80]);
 $bytes = $client->compress(Source::fromBytes($raw), ['q' => 80]);
 ```
 
+## Geometry ops: smart crop, trim, fill, autorot
+
+`crop` has three mutually exclusive modes. Pass `null` for the positional
+`$x`/`$y`/`$width`/`$height` args not used by a given mode.
+
+```php
+// Manual: exact rectangle.
+$bytes = $client->crop('https://example.com/image.jpg', 0, 0, 100, 100);
+
+// Smart: gravity picks the window. One of 'attention', 'entropy', 'centre'.
+$bytes = $client->crop('https://example.com/image.jpg', null, null, 200, 200, ['gravity' => 'attention']);
+
+// Trim: removes a uniform background border. threshold defaults to 10.0 server-side.
+$bytes = $client->crop('https://example.com/image.jpg', null, null, null, null, ['trim' => true, 'threshold' => 5.0]);
+```
+
+`resize` gains a fill mode: pass `width` + `height` in `$options` (instead of
+`scale`/`scale_x`/`scale_y`) to resize and smart-crop to exact dimensions in
+one call; `gravity` defaults to `'attention'`.
+
+```php
+$bytes = $client->resize('https://example.com/image.jpg', ['width' => 200, 'height' => 150, 'gravity' => 'entropy']);
+```
+
+All four ops (`resize`, `compress`, `convert`, `crop`) accept `'autorot' => true`
+in `$options` to apply EXIF orientation before processing.
+
+When a crop actually trims, the response carries
+`X-Pictomancer-Trim-Left/-Top/-Width/-Height` headers.
+
 ## Quality target: smallest file above an SSIM floor
 
 Instead of guessing a `q` number, pass `quality_target` (float, 0 < v <= 1) to

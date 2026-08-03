@@ -6,7 +6,7 @@ namespace Pictomancer;
 
 final class Client
 {
-    public const VERSION = '0.2.0';
+    public const VERSION = '0.4.0';
 
     public const DEFAULT_BASE_URL = 'https://api.pictomancer.ai';
 
@@ -46,7 +46,11 @@ final class Client
     }
 
     /**
-     * @param array<string, mixed> $options scale, scale_x, scale_y, format, ...
+     * Fill mode: pass `width` + `height` in $options (optionally `gravity`,
+     * one of 'attention', 'entropy', 'centre', default 'attention') instead
+     * of scale/scale_x/scale_y to resize and smart-crop in one call.
+     *
+     * @param array<string, mixed> $options scale, scale_x, scale_y, format, width, height, gravity, autorot, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed> raw bytes for inline delivery, JSON dict for put_url/callback_url
      */
@@ -56,7 +60,7 @@ final class Client
     }
 
     /**
-     * @param array<string, mixed> $options format, q, quality_target, strip, ...
+     * @param array<string, mixed> $options format, q, quality_target, strip, autorot, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed>
      */
@@ -66,7 +70,7 @@ final class Client
     }
 
     /**
-     * @param array<string, mixed> $options q, quality_target, strip, lossless, ...
+     * @param array<string, mixed> $options q, quality_target, strip, lossless, autorot, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed>
      */
@@ -76,13 +80,23 @@ final class Client
     }
 
     /**
-     * @param array<string, mixed> $options format, ...
+     * Three mutually exclusive modes: manual (x+y+width+height), smart
+     * (`gravity` in $options + width+height, x/y null), trim (`trim: true`
+     * in $options, x/y/width/height null). `autorot` in $options is valid
+     * in all three.
+     *
+     * @param array<string, mixed> $options format, gravity, trim, threshold, autorot, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed>
      */
-    public function crop(string $source, int $x, int $y, int $width, int $height, array $options = [], ?array $delivery = null): string|array
+    public function crop(string $source, ?int $x, ?int $y, ?int $width, ?int $height, array $options = [], ?array $delivery = null): string|array
     {
-        $body = ['source' => $source, 'x' => $x, 'y' => $y, 'width' => $width, 'height' => $height] + $options;
+        $body = ['source' => $source];
+        if ($x !== null) $body['x'] = $x;
+        if ($y !== null) $body['y'] = $y;
+        if ($width !== null) $body['width'] = $width;
+        if ($height !== null) $body['height'] = $height;
+        $body += $options;
 
         return $this->process('/v1/crop', $body, $delivery);
     }

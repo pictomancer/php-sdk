@@ -181,4 +181,85 @@ final class ClientTest extends TestCase
         $this->assertStringContainsString('"quality_target":0.9', $body);
         $this->assertStringContainsString('"format":"avif"', $body);
     }
+
+    public function testCropSmartSendsGravityViaOptionsWithoutXY(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->crop(self::SOURCE, null, null, 200, 200, ['gravity' => 'attention']);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"gravity":"attention"', $body);
+        $this->assertStringContainsString('"width":200', $body);
+        $this->assertStringContainsString('"height":200', $body);
+        $this->assertStringNotContainsString('"x"', $body);
+        $this->assertStringNotContainsString('"y"', $body);
+    }
+
+    public function testCropTrimSendsThresholdWithoutDims(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->crop(self::SOURCE, null, null, null, null, ['trim' => true, 'threshold' => 5.0]);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"trim":true', $body);
+        $this->assertStringContainsString('"threshold":5', $body);
+        $this->assertStringNotContainsString('"width"', $body);
+        $this->assertStringNotContainsString('"height"', $body);
+    }
+
+    public function testCropManualRegressionSendsAllFour(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->crop(self::SOURCE, 0, 0, 100, 100, ['format' => 'webp']);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"x":0', $body);
+        $this->assertStringContainsString('"y":0', $body);
+        $this->assertStringContainsString('"width":100', $body);
+        $this->assertStringContainsString('"height":100', $body);
+        $this->assertStringNotContainsString('"gravity"', $body);
+        $this->assertStringNotContainsString('"trim"', $body);
+    }
+
+    public function testCropPutsAutorotInBody(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->crop(self::SOURCE, 0, 0, 100, 100, ['autorot' => true]);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"autorot":true', $body);
+    }
+
+    public function testResizePutsFillModeParamsInBody(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->resize(self::SOURCE, ['width' => 200, 'height' => 150, 'gravity' => 'entropy']);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"width":200', $body);
+        $this->assertStringContainsString('"height":150', $body);
+        $this->assertStringContainsString('"gravity":"entropy"', $body);
+        $this->assertStringNotContainsString('"scale"', $body);
+    }
+
+    public function testUserAgentReportsCurrentVersion(): void
+    {
+        $transport = new FakeTransport($this->jsonResponse(200, ['formats' => []]));
+        $client = $this->newClient($transport);
+
+        $client->info();
+
+        $headers = $transport->lastCall()['headers'];
+        $this->assertStringContainsString('pictomancer-php/0.4.0', $headers['User-Agent']);
+    }
 }
