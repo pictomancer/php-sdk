@@ -252,6 +252,31 @@ final class ClientTest extends TestCase
         $this->assertStringNotContainsString('"scale"', $body);
     }
 
+    public function testCompressPutsEnhanceParamsInBody(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->compress(self::SOURCE, ['denoise' => 2, 'sharpen' => true]);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"denoise":2', $body);
+        $this->assertStringContainsString('"sharpen":true', $body);
+    }
+
+    public function testConvertOmitsEnhanceParamsByDefault(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->convert(self::SOURCE, 'webp');
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringNotContainsString('"denoise"', $body);
+        $this->assertStringNotContainsString('"equalize"', $body);
+        $this->assertStringNotContainsString('"sharpen"', $body);
+    }
+
     public function testUserAgentReportsCurrentVersion(): void
     {
         $transport = new FakeTransport($this->jsonResponse(200, ['formats' => []]));
@@ -260,6 +285,6 @@ final class ClientTest extends TestCase
         $client->info();
 
         $headers = $transport->lastCall()['headers'];
-        $this->assertStringContainsString('pictomancer-php/0.4.0', $headers['User-Agent']);
+        $this->assertStringContainsString('pictomancer-php/0.5.0', $headers['User-Agent']);
     }
 }

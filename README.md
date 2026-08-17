@@ -87,6 +87,27 @@ in `$options` to apply EXIF orientation before processing.
 When a crop actually trims, the response carries
 `X-Pictomancer-Trim-Left/-Top/-Width/-Height` headers.
 
+## Enhance: denoise, auto-contrast, sharpen
+
+All four ops (`resize`, `compress`, `convert`, `crop`) accept three opt-in
+modifiers in `$options`, applied in a fixed order around the operation itself:
+`autorot -> denoise -> equalize -> op -> sharpen`. Base price, no surcharge.
+
+- **`denoise`** - integer 1-3, median denoise (window 3x3 to 7x7) before the operation.
+- **`equalize`** - boolean, auto-contrast (histogram equalisation of the value channel; hue and saturation preserved) before the operation.
+- **`sharpen`** - boolean, unsharp-mask sharpen after the operation (libvips defaults).
+
+```php
+$bytes = $client->convert('https://example.com/image.jpg', 'webp', [
+    'denoise' => 2,
+    'equalize' => true,
+]);
+$bytes = $client->resize('https://example.com/image.jpg', ['scale' => 0.5, 'sharpen' => true]);
+```
+
+A `compress` that grows because of these modifiers is still billed
+(`X-Pig-Billed: 1`), unlike a plain compress with no gain.
+
 ## Quality target: smallest file above an SSIM floor
 
 Instead of guessing a `q` number, pass `quality_target` (float, 0 < v <= 1) to

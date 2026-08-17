@@ -6,7 +6,7 @@ namespace Pictomancer;
 
 final class Client
 {
-    public const VERSION = '0.4.0';
+    public const VERSION = '0.5.0';
 
     public const DEFAULT_BASE_URL = 'https://api.pictomancer.ai';
 
@@ -50,7 +50,7 @@ final class Client
      * one of 'attention', 'entropy', 'centre', default 'attention') instead
      * of scale/scale_x/scale_y to resize and smart-crop in one call.
      *
-     * @param array<string, mixed> $options scale, scale_x, scale_y, format, width, height, gravity, autorot, ...
+     * @param array<string, mixed> $options scale, scale_x, scale_y, format, width, height, gravity, autorot, denoise, equalize, sharpen, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed> raw bytes for inline delivery, JSON dict for put_url/callback_url
      */
@@ -60,7 +60,7 @@ final class Client
     }
 
     /**
-     * @param array<string, mixed> $options format, q, quality_target, strip, autorot, ...
+     * @param array<string, mixed> $options format, q, quality_target, strip, autorot, denoise, equalize, sharpen, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed>
      */
@@ -70,7 +70,7 @@ final class Client
     }
 
     /**
-     * @param array<string, mixed> $options q, quality_target, strip, lossless, autorot, ...
+     * @param array<string, mixed> $options q, quality_target, strip, lossless, autorot, denoise, equalize, sharpen, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed>
      */
@@ -82,10 +82,10 @@ final class Client
     /**
      * Three mutually exclusive modes: manual (x+y+width+height), smart
      * (`gravity` in $options + width+height, x/y null), trim (`trim: true`
-     * in $options, x/y/width/height null). `autorot` in $options is valid
-     * in all three.
+     * in $options, x/y/width/height null). `autorot`, `denoise`, `equalize`
+     * and `sharpen` in $options are valid in all three.
      *
-     * @param array<string, mixed> $options format, gravity, trim, threshold, autorot, ...
+     * @param array<string, mixed> $options format, gravity, trim, threshold, autorot, denoise, equalize, sharpen, ...
      * @param array<string, mixed>|null $delivery
      * @return string|array<string, mixed>
      */
