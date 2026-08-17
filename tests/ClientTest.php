@@ -182,6 +182,29 @@ final class ClientTest extends TestCase
         $this->assertStringContainsString('"format":"avif"', $body);
     }
 
+    public function testOptimizeGeneratedSendsOnlySourceByDefault(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->optimizeGenerated(self::SOURCE);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertSame(json_encode(['source' => self::SOURCE]), $body);
+    }
+
+    public function testOptimizeGeneratedPutsFormatAndMaxDimensionInBody(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->optimizeGenerated(self::SOURCE, ['format' => 'avif', 'max_dimension' => 1600]);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"format":"avif"', $body);
+        $this->assertStringContainsString('"max_dimension":1600', $body);
+    }
+
     public function testCropSmartSendsGravityViaOptionsWithoutXY(): void
     {
         $transport = new FakeTransport($this->imageResponse(self::PNG));
@@ -285,6 +308,6 @@ final class ClientTest extends TestCase
         $client->info();
 
         $headers = $transport->lastCall()['headers'];
-        $this->assertStringContainsString('pictomancer-php/0.5.0', $headers['User-Agent']);
+        $this->assertStringContainsString('pictomancer-php/0.6.0', $headers['User-Agent']);
     }
 }

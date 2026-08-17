@@ -6,7 +6,7 @@ namespace Pictomancer;
 
 final class Client
 {
-    public const VERSION = '0.5.0';
+    public const VERSION = '0.6.0';
 
     public const DEFAULT_BASE_URL = 'https://api.pictomancer.ai';
 
@@ -77,6 +77,16 @@ final class Client
     public function convert(string $source, string $format, array $options = [], ?array $delivery = null): string|array
     {
         return $this->process('/v1/convert', ['source' => $source, 'format' => $format] + $options, $delivery);
+    }
+
+    /**
+     * @param array<string, mixed> $options format, q, quality_target, max_dimension, strip, ...
+     * @param array<string, mixed>|null $delivery
+     * @return string|array<string, mixed>
+     */
+    public function optimizeGenerated(string $source, array $options = [], ?array $delivery = null): string|array
+    {
+        return $this->process('/v1/optimize_generated', ['source' => $source] + $options, $delivery);
     }
 
     /**

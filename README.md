@@ -138,6 +138,21 @@ returns only the body (bytes or JSON), so read the headers with your own HTTP
 tooling if you need the report. `X-Pig-Billed: 0` means the input came back
 untouched and the request was free.
 
+## AI-generated images: one call to web-ready
+
+Image generators (gpt-image, DALL-E, Flux, Midjourney, Stable Diffusion)
+return 2-8 MB PNGs. optimize_generated returns the same picture as web-ready
+webp (default), avif, jpeg or png: metadata stripped, transparency kept,
+optional max_dimension cap (never upscales), optional q or quality_target.
+Same price as convert; a result that is not smaller is returned free.
+
+```php
+$bytes = $client->optimizeGenerated('https://example.com/gen.png', [
+    'format' => 'avif',
+    'max_dimension' => 1600,
+]);
+```
+
 ## Delivery: write the result somewhere else
 
 By default an operation returns the optimized bytes. Pass a delivery target to
