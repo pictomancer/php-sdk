@@ -205,6 +205,30 @@ final class ClientTest extends TestCase
         $this->assertStringContainsString('"max_dimension":1600', $body);
     }
 
+    public function testRemoveBackgroundSendsOnlySourceByDefault(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->removeBackground(self::SOURCE);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertSame(json_encode(['source' => self::SOURCE]), $body);
+        $this->assertStringEndsWith('/v1/remove_background', $transport->lastCall()['url']);
+    }
+
+    public function testRemoveBackgroundPutsFormatAndQInBody(): void
+    {
+        $transport = new FakeTransport($this->imageResponse(self::PNG));
+        $client = $this->newClient($transport);
+
+        $client->removeBackground(self::SOURCE, ['format' => 'webp', 'q' => 80]);
+
+        $body = $transport->lastCall()['body'];
+        $this->assertStringContainsString('"format":"webp"', $body);
+        $this->assertStringContainsString('"q":80', $body);
+    }
+
     public function testCropSmartSendsGravityViaOptionsWithoutXY(): void
     {
         $transport = new FakeTransport($this->imageResponse(self::PNG));
@@ -308,6 +332,6 @@ final class ClientTest extends TestCase
         $client->info();
 
         $headers = $transport->lastCall()['headers'];
-        $this->assertStringContainsString('pictomancer-php/0.6.0', $headers['User-Agent']);
+        $this->assertStringContainsString('pictomancer-php/0.7.0', $headers['User-Agent']);
     }
 }

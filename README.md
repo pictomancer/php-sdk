@@ -153,6 +153,19 @@ $bytes = $client->optimizeGenerated('https://example.com/gen.png', [
 ]);
 ```
 
+## Background removal
+
+removeBackground cuts out the subject and returns it on a transparent
+background as png (default), webp or avif. jpeg is not allowed. The output
+keeps transparency. q (1-100) applies to webp and avif only; png ignores it.
+
+```php
+$bytes = $client->removeBackground('https://example.com/product.jpg', [
+    'format' => 'webp',
+    'q' => 80,
+]);
+```
+
 ## Delivery: write the result somewhere else
 
 By default an operation returns the optimized bytes. Pass a delivery target to
